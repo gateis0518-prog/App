@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Google Sheets, Apps Script, AI Studio, HTML로 만드는 웹 프로젝트 소개 페이지">
+  <title>PROJECT LAB — 웹앱 제작 프로젝트</title>
+  <style>
+    :root{
+      --bg:#070a12;
+      --panel:rgba(16,22,38,.74);
+      --panel-strong:rgba(20,27,47,.92);
+      --text:#f6f7fb;
+      --muted:#9aa5bd;
+      --line:rgba(255,255,255,.10);
+      --accent:#8b7dff;
+      --accent2:#42d6b8;
+      --shadow:0 24px 80px rgba(0,0,0,.38);
+      --radius:26px;
+      --container:min(1120px, calc(100% - 40px));
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,"Pretendard","Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(139,125,255,.19), transparent 28%),
+        radial-gradient(circle at 85% 25%, rgba(66,214,184,.12), transparent 24%),
+        linear-gradient(180deg,#070a12 0%,#0b1020 52%,#070a12 100%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.28;
+      background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);
+      background-size:40px 40px;
+      mask-image:linear-gradient(to bottom,black,transparent 80%);
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{width:var(--container);margin:0 auto}
+    nav{
+      position:sticky;top:0;z-index:50;
+      background:rgba(7,10,18,.68);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--line);
+    }
+    .nav-inner{height:74px;display:flex;align-items:center;justify-content:space-between}
+    .brand{font-weight:800;letter-spacing:.08em;font-size:14px}
+    .brand span{color:var(--accent)}
+    .nav-links{display:flex;gap:24px;color:var(--muted);font-size:13px}
+    .nav-links a:hover{color:#fff}
+    .hero{padding:108px 0 86px;position:relative}
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border:1px solid var(--line);border-radius:999px;
+      color:#c9c4ff;background:rgba(139,125,255,.08);font-size:12px;font-weight:700;
+    }
+    .dot{width:7px;height:7px;border-radius:999px;background:var(--accent2);box-shadow:0 0 18px var(--accent2)}
+    h1{
+      max-width:920px;margin:20px 0 20px;
+      font-size:clamp(46px,8vw,92px);line-height:.98;letter-spacing:-.055em;
+    }
+    .gradient{
+      background:linear-gradient(105deg,#fff 20%,#aaa1ff 55%,#59e4c7 90%);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .hero-copy{max-width:700px;color:var(--muted);font-size:18px;line-height:1.75}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px}
+    .btn{
+      border-radius:14px;padding:13px 18px;font-weight:800;font-size:14px;
+      border:1px solid var(--line);display:inline-flex;align-items:center;gap:9px;
+      transition:.2s transform,.2s border-color,.2s background;
+    }
+    .btn:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.2)}
+    .btn-primary{background:#fff;color:#0a0d15}
+    .btn-ghost{background:rgba(255,255,255,.04);color:#fff}
+    section{padding:92px 0}
+    .section-head{display:flex;justify-content:space-between;gap:28px;align-items:end;margin-bottom:28px}
+    .section-head h2{font-size:clamp(28px,4vw,46px);margin:0;letter-spacing:-.04em}
+    .section-head p{max-width:520px;color:var(--muted);line-height:1.7;margin:0}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .card{
+      padding:26px;border:1px solid var(--line);border-radius:var(--radius);
+      background:var(--panel);box-shadow:var(--shadow);
+    }
+    .card small{color:#b7bed0;font-weight:700}
+    .card h3{margin:11px 0 10px;font-size:21px}
+    .card p{margin:0;color:var(--muted);line-height:1.7;font-size:14px}
+    .icon{
+      width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+      border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:18px;
+    }
+    .marquee-shell{
+      overflow:hidden;padding:22px 0 34px;
+      position:relative;
+    }
+    .marquee-shell:before,.marquee-shell:after{
+      content:"";position:absolute;top:0;bottom:0;width:12%;
+      z-index:3;pointer-events:none;
+      background:linear-gradient(90deg,#070a12,transparent);
+    }
+    .marquee-shell:before{left:0}.marquee-shell:after{right:0;transform:rotate(180deg)}
+    .message-track{
+      display:flex;gap:18px;will-change:transform;
+      transition:transform .8s cubic-bezier(.22,.8,.3,1);
+    }
+    .message-card{
+      flex:0 0 calc((100% - 36px)/3);
+      min-height:178px;padding:24px;border:1px solid var(--line);border-radius:24px;
+      background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.028));
+      opacity:.38;filter:blur(1px);transform:scale(.92);
+      transition:opacity .55s,filter .55s,transform .55s,border-color .55s,background .55s;
+    }
+    .message-card.active{
+      opacity:1;filter:none;transform:scale(1.03);
+      background:var(--panel-strong);border-color:rgba(139,125,255,.5);
+      box-shadow:0 26px 70px rgba(0,0,0,.34),0 0 50px rgba(139,125,255,.10);
+    }
+    .message-meta{display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .avatar{
+      width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+      background:linear-gradient(135deg,#8b7dff,#45d8b8);color:#0b1020;font-weight:900;
+    }
+    .nickname{font-weight:800}
+    .time{color:#7f8aa0;font-size:11px}
+    .message-text{margin-top:24px;font-size:17px;line-height:1.6;word-break:keep-all}
+    .form-card{
+      display:grid;grid-template-columns:1.05fr .95fr;gap:22px;
+      padding:28px;border-radius:var(--radius);border:1px solid var(--line);
+      background:linear-gradient(145deg,rgba(139,125,255,.11),rgba(66,214,184,.05));
+      box-shadow:var(--shadow);
+    }
+    .form-info h3{font-size:32px;margin:0 0 12px;letter-spacing:-.04em}
+    .form-info p{color:var(--muted);line-height:1.75}
+    .input-wrap{display:grid;gap:12px}
+    input,textarea{
+      width:100%;border:1px solid var(--line);border-radius:15px;
+      background:rgba(0,0,0,.22);color:#fff;padding:14px 15px;outline:none;
+      font:inherit;
+    }
+    input:focus,textarea:focus{border-color:rgba(139,125,255,.75);box-shadow:0 0 0 4px rgba(139,125,255,.09)}
+    textarea{min-height:128px;resize:vertical}
+    .submit-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:2px}
+    .counter{font-size:12px;color:#7f8aa0}
+    .status{min-height:20px;font-size:13px;color:#aeb7ca}
+    .status.success{color:#64e0c0}.status.error{color:#ff9b9b}
+    footer{padding:28px 0 48px;color:#778198;font-size:12px;border-top:1px solid var(--line)}
+    .footer-inner{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+    .pill{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.035)}
+    @media(max-width:820px){
+      .nav-links{display:none}
+      .hero{padding-top:78px}
+      .grid-3,.form-card{grid-template-columns:1fr}
+      .message-card{flex-basis:86%}
+      .message-track{gap:12px}
+      .marquee-shell:before,.marquee-shell:after{width:5%}
+      .section-head{display:block}
+      .section-head p{margin-top:12px}
+    }
+    @media(max-width:520px){
+      :root{--container:calc(100% - 26px)}
+      .hero-copy{font-size:16px}
+      section{padding:68px 0}
+      .message-card{flex-basis:100%}
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top">PROJECT<span>LAB</span></a>
+      <div class="nav-links">
+        <a href="#about">프로젝트</a>
+        <a href="#stack">기술 스택</a>
+        <a href="#support">응원하기</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow"><span class="dot"></span> BUILD · TEST · PUBLISH</div>
+        <h1>아이디어를<br><span class="gradient">웹앱으로 만든다.</span></h1>
+        <p class="hero-copy">
+          Google Sheets와 Apps Script를 서버처럼 연결하고,
+          AI Studio와 HTML/JavaScript로 기능을 만들고,
+          GitHub Pages로 누구나 볼 수 있는 웹페이지로 배포하는 프로젝트입니다.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#support">응원메시지 남기기 ↓</a>
+          <a class="btn btn-ghost" href="https://github.com/gateis0518-prog/App" target="_blank" rel="noreferrer">GitHub 보기 ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>이 프로젝트는<br>이렇게 만들어집니다.</h2>
+          <p>별도의 복잡한 서버 인프라부터 시작하지 않고, 익숙한 웹 기술과 Google 생태계를 연결해 하나의 서비스 흐름을 만들어봅니다.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card">
+            <div class="icon">01</div>
+            <small>DATA</small>
+            <h3>Google Sheets</h3>
+            <p>사용자가 남긴 닉네임과 응원메시지를 시트의 data 탭에 차곡차곡 저장합니다.</p>
+          </article>
+          <article class="card">
+            <div class="icon">02</div>
+            <small>API</small>
+            <h3>Apps Script</h3>
+            <p>웹페이지와 Google Sheets 사이를 연결하는 가벼운 API 서버 역할을 합니다.</p>
+          </article>
+          <article class="card">
+            <div class="icon">03</div>
+            <small>WEB</small>
+            <h3>HTML + AI Studio</h3>
+            <p>아이디어를 실제 화면과 인터랙션으로 구현하고 GitHub Pages로 공개합니다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Project Stack</h2>
+          <p>작게 시작해서 필요한 기능을 하나씩 붙일 수 있도록 구성했습니다.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card"><small>01</small><h3>HTML / CSS / JS</h3><p>웹페이지의 구조, 디자인, 애니메이션, 폼 입력을 담당합니다.</p></article>
+          <article class="card"><small>02</small><h3>Apps Script</h3><p>폼 데이터를 받아 Google Sheets에 저장하고, 저장된 메시지를 웹으로 전달합니다.</p></article>
+          <article class="card"><small>03</small><h3>GitHub Pages</h3><p>완성한 정적 웹페이지를 저장소와 연결해 실제 공개 페이지로 배포합니다.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="support">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>응원메시지</h2>
+          <p>지금 화면에 보이는 세 개의 메시지는 자동으로 움직입니다. 가운데 메시지만 선명하게 강조됩니다.</p>
+        </div>
+
+        <div class="marquee-shell" aria-live="polite">
+          <div id="messageTrack" class="message-track"></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-info">
+            <h3>한마디 남겨주세요.</h3>
+            <p>별명과 응원메시지를 입력하면 Google Sheets의 <strong>data</strong> 시트에 저장됩니다.</p>
+            <div id="status" class="status"></div>
+          </div>
+          <form id="supportForm">
+            <div class="input-wrap">
+              <input id="nickname" name="nickname" maxlength="30" placeholder="별명" required autocomplete="nickname">
+              <textarea id="message" name="message" maxlength="500" placeholder="응원메시지를 남겨주세요." required></textarea>
+              <div class="submit-row">
+                <span class="counter"><span id="messageCount">0</span> / 500</span>
+                <button class="btn btn-primary" type="submit">응원 보내기 →</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>PROJECT LAB · Google Sheets + Apps Script + HTML</span>
+      <span class="pill">Made for experiments</span>
+    </div>
+  </footer>
+
+  <iframe name="submitFrame" id="submitFrame" title="form-submit" style="display:none"></iframe>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzE6xq3wfNXNduzX9ZhsrE5yReeyxLtX5bV61KG-2vupo3UQkAuuHZ5rrPjK1bUNNDl/exec';
+
+    const fallbackMessages = [
+      { nickname: 'PROJECT LAB', message: '아이디어를 실제 웹앱으로 만들어가는 과정을 응원합니다!', timestamp: '' },
+      { nickname: 'AI FRIEND', message: '작은 기능 하나가 멋진 프로젝트의 시작이 되길 바랍니다.', timestamp: '' },
+      { nickname: 'VISITOR', message: '재미있는 프로젝트 계속 만들어주세요. 응원합니다!', timestamp: '' },
+      { nickname: 'CODER', message: 'Google Sheets와 웹을 연결하는 발상이 멋져요!', timestamp: '' },
+      { nickname: 'MAKER', message: '오늘도 새로운 기능 하나씩 완성해봅시다 🚀', timestamp: '' }
+    ];
+
+    const track = document.getElementById('messageTrack');
+    const status = document.getElementById('status');
+    const form = document.getElementById('supportForm');
+    const messageInput = document.getElementById('message');
+    const messageCount = document.getElementById('messageCount');
+
+    let messages = [];
+    let position = 0;
+    let timer = null;
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      }[char]));
+    }
+
+    function shortTime(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return new Intl.DateTimeFormat('ko-KR', { month:'short', day:'numeric' }).format(date);
+    }
+
+    function normalizeMessages(list) {
+      return list
+        .filter(item => item && item.nickname && item.message)
+        .map(item => ({
+          nickname: String(item.nickname),
+          message: String(item.message),
+          timestamp: item.timestamp || ''
+        }));
+    }
+
+    function renderMessages() {
+      if (messages.length === 0) messages = [...fallbackMessages];
+
+      const source = messages.length >= 3 ? messages : [...messages, ...fallbackMessages];
+      const visiblePool = source.slice(0, Math.max(5, Math.min(source.length, 12)));
+
+      // 앞뒤 복제본을 붙여 자연스러운 무한 순환
+      const loopItems = [...visiblePool.slice(-2), ...visiblePool, ...visiblePool.slice(0, 2)];
+
+      track.innerHTML = loopItems.map((item, index) => {
+        return '<article class="message-card" data-index="' + index + '">' +
+          '<div class="message-meta">' +
+            '<div style="display:flex;align-items:center;gap:11px">' +
+              '<div class="avatar">' + escapeHtml(item.nickname.slice(0,1).toUpperCase()) + '</div>' +
+              '<div class="nickname">' + escapeHtml(item.nickname) + '</div>' +
+            '</div>' +
+            '<div class="time">' + escapeHtml(shortTime(item.timestamp)) + '</div>' +
+          '</div>' +
+          '<div class="message-text">“' + escapeHtml(item.message) + '”</div>' +
+        '</article>';
+      }).join('');
+
+      position = 2;
+      applyPosition(false);
+    }
+
+    function getCardStep() {
+      const card = track.querySelector('.message-card');
+      if (!card) return 0;
+      const gap = parseFloat(getComputedStyle(track).gap || '0');
+      return card.getBoundingClientRect().width + gap;
+    }
+
+    function applyPosition(animate = true) {
+      if (!track.children.length) return;
+      track.style.transition = animate ? 'transform .8s cubic-bezier(.22,.8,.3,1)' : 'none';
+      track.style.transform = 'translateX(' + (-position * getCardStep()) + 'px)';
+
+      [...track.children].forEach((card, index) => {
+        card.classList.toggle('active', index === position + (window.innerWidth <= 820 ? 0 : 1));
+      });
+    }
+
+    function nextMessage() {
+      const sourceLength = Math.max(5, Math.min(messages.length || fallbackMessages.length, 12));
+      position += 1;
+      applyPosition(true);
+
+      if (position >= sourceLength + 2) {
+        setTimeout(() => {
+          position = 2;
+          applyPosition(false);
+        }, 820);
+      }
+    }
+
+    function startAutoScroll() {
+      clearInterval(timer);
+      timer = setInterval(nextMessage, 3600);
+    }
+
+    async function loadMessages() {
+      try {
+        const response = await fetch(API_URL + '?action=messages', { method:'GET', cache:'no-store' });
+        const data = await response.json();
+        if (data && Array.isArray(data.messages)) {
+          const loaded = normalizeMessages(data.messages);
+          if (loaded.length) messages = loaded.slice(-50).reverse();
+        }
+      } catch (error) {
+        // Apps Script의 GET 기능이 아직 배포되지 않은 경우에도
+        // 기본 메시지로 페이지가 정상적으로 보이도록 합니다.
+      }
+      renderMessages();
+      startAutoScroll();
+    }
+
+    messageInput.addEventListener('input', () => {
+      messageCount.textContent = messageInput.value.length;
+    });
+
+    form.addEventListener('submit', () => {
+      const nickname = document.getElementById('nickname').value.trim();
+      const message = messageInput.value.trim();
+
+      if (!nickname || !message) return;
+
+      if (message.length > 500 || nickname.length > 30) return;
+
+      const newItem = { nickname, message, timestamp: new Date().toISOString() };
+      messages.unshift(newItem);
+      messages = messages.slice(0, 50);
+      renderMessages();
+      startAutoScroll();
+
+      status.textContent = '응원메시지를 보내는 중입니다…';
+      status.className = 'status';
+
+      // CORS 영향을 줄이기 위해 일반 HTML form + hidden iframe 방식으로 전송합니다.
+      form.action = API_URL;
+      form.method = 'POST';
+      form.target = 'submitFrame';
+
+      setTimeout(() => {
+        status.textContent = '응원메시지가 전달되었습니다. 감사합니다! 💜';
+        status.className = 'status success';
+        form.reset();
+        messageCount.textContent = '0';
+      }, 700);
+    });
+
+    window.addEventListener('resize', () => applyPosition(false));
+
+    loadMessages();
+  </script>
+</body>
+</html>
